@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Text Scroller</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Text Scroller</h1>
+      <textarea id="inputText" placeholder="Enter your text here..."></textarea>
+      <input
+        type="number"
+        id="scrollTime"
+        placeholder="Scroll time in seconds (default is 20s)"
+      />
+      <div class="scroll-options">
+        <label>
+          <input type="radio" name="autoScroll" value="ON" checked /> Auto
+          Scroll
+        </label>
+        <label>
+          <input type="radio" name="autoScroll" value="OFF" /> No Auto Scroll
+        </label>
+      </div>
+      <button id="submitButton">Submit</button>
+    </div>
+    <div class="response-container">
+      <div id="scrollContent">Your scrolling text will appear here...</div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
