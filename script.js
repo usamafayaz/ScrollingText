@@ -44,67 +44,102 @@ document
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const htmlContent = await response.text(); // Use .text() instead of .json() to handle HTML
+      let htmlContent = await response.text();
+
+      // Create a temporary element to parse the HTML
+      const tempElement = document.createElement("div");
+      tempElement.innerHTML = htmlContent;
+
+      // Remove the controlArea div
+      const controlArea = tempElement.querySelector("#controlArea");
+      if (controlArea) {
+        controlArea.remove();
+      }
+
+      // Remove all anchor tags
+      const anchors = tempElement.querySelectorAll("a");
+      anchors.forEach((anchor) => anchor.remove());
+
+      // Get the cleaned HTML content
+      htmlContent = tempElement.innerHTML;
 
       // Open a new tab
       const newTab = window.open("", "_blank");
 
       // Write the content to the new tab
       newTab.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Scrolling Text</title>
-          <style>
-            body {
-              background-color: black;
-              color: white;
-              font-family: "Courier New", monospace;
-              margin: 0;
-              padding: 0;
-              overflow: hidden;
-            }
-            #scrollContent {
-              white-space: pre-wrap;
-              font-size: 16px;
-              padding: 20px;
-              overflow-y: scroll;
-              height: 100vh;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="scrollContent">${htmlContent}</div>
-          <script>
-            function autoScrollContent(container, scrollTime) {
-              const totalHeight = container.scrollHeight - container.clientHeight;
-              const scrollPerMs = totalHeight / (scrollTime * 1000);
-              let scrollPosition = 0;
-              const startScroll = performance.now();
-  
-              function step(timestamp) {
-                const elapsed = timestamp - startScroll;
-                scrollPosition = elapsed * scrollPerMs;
-                container.scrollTop = scrollPosition;
-  
-                if (scrollPosition < totalHeight) {
-                  requestAnimationFrame(step);
-                }
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Scrolling Text</title>
+        <style>
+          html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+          }
+          body {
+            background-color: black;
+            color: white;
+            font-family: "Courier New", monospace;
+            display: flex;
+            flex-direction: column;
+          }
+          #scrollContent {
+            flex: 1;
+            white-space: pre-wrap;
+            font-size: 16px;
+            padding: 20px;
+            overflow-y: scroll;
+            box-sizing: border-box;
+            margin: 0;
+          }
+          #scrollContent::-webkit-scrollbar {
+            width: 12px;
+          }
+          #scrollContent::-webkit-scrollbar-track {
+            background: #000;
+          }
+          #scrollContent::-webkit-scrollbar-thumb {
+            background-color: #333;
+            border-radius: 6px;
+            border: 3px solid #000;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="scrollContent">${htmlContent}</div>
+        <script>
+          function autoScrollContent(container, scrollTime) {
+            const totalHeight = container.scrollHeight - container.clientHeight;
+            const scrollPerMs = totalHeight / (scrollTime * 1000);
+            let scrollPosition = 0;
+            const startScroll = performance.now();
+
+            function step(timestamp) {
+              const elapsed = timestamp - startScroll;
+              scrollPosition = elapsed * scrollPerMs;
+              container.scrollTop = scrollPosition;
+
+              if (scrollPosition < totalHeight) {
+                requestAnimationFrame(step);
               }
-  
-              requestAnimationFrame(step);
             }
-  
-            const scrollContainer = document.getElementById('scrollContent');
-            if ("${autoScroll}" === "ON") {
-              autoScrollContent(scrollContainer, ${scrollTime});
-            }
-          </script>
-        </body>
-        </html>
-      `);
+
+            requestAnimationFrame(step);
+          }
+
+          const scrollContainer = document.getElementById('scrollContent');
+          if ("${autoScroll}" === "ON") {
+            autoScrollContent(scrollContainer, ${scrollTime});
+          }
+        </script>
+      </body>
+      </html>
+    `);
 
       newTab.document.close();
     } catch (error) {
